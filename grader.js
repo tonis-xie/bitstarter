@@ -62,14 +62,12 @@ var buildCheck = function(checksfile) {
 	if (result instanceof Error) {
             console.error('Error: ' + util.format(response.message));
         } else {
+            fs.writeFileSync('result.html', result);
             $ = cheerio.load(result);
-            var checks = loadChecks(checksfile).sort();
-	    var out = {};
-	    for(var ii in checks) {
-		var present = $(checks[ii]).length > 0;
-		out[checks[ii]] = present;
-	    }
-            console.log(JSON.stringify(out, null, 4)); 
+            var sel = $('.col.dealing > div');
+    	    for(var ii in sel) {
+    		  console.log(sel[ii].children.data);
+    	    }
         }
     };
     return checkResponse; 
@@ -77,7 +75,9 @@ var buildCheck = function(checksfile) {
 
 var checkUrl = function(url, checksfile) {
     var checkResponse = buildCheck(checksfile);
-    rest.get(url).on('complete', checkResponse);
+    rest
+      .get(url, {query:'spm=a230r.1.8.3.MDdaVT&promote=0&sort=sale-desc&initiative_id=tbindexz_20130711&tab=all&q=%BB%AF%D7%B1%C6%B7&style=list#J_relative'})
+      .on('complete', checkResponse);
 };
 
 var clone = function(fn) {
@@ -87,18 +87,20 @@ var clone = function(fn) {
 };
 
 if(require.main == module) {
-    program
-        .option('-c, --checks <check_file>', 'Path to checks.json', clone(assertFileExists), CHECKSFILE_DEFAULT)
-        .option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists), HTMLFILE_DEFAULT)
-        .option('-u, --url <url>', 'Url to html file for check')
-        .parse(process.argv)
-    if(program.url) {
-	checkUrl(program.url, program.checks);
-    } else {
-	var checkJson = checkHtmlFile(program.file, program.checks);
-	var outJson = JSON.stringify(checkJson, null, 4);
-	console.log(outJson);
-    }
+ //    program
+ //        .option('-c, --checks <check_file>', 'Path to checks.json', clone(assertFileExists), CHECKSFILE_DEFAULT)
+ //        .option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists), HTMLFILE_DEFAULT)
+ //        .option('-u, --url <url>', 'Url to html file for check')
+ //        .parse(process.argv);
+ //    if(program.url) {
+	// checkUrl(program.url, program.checks);
+ //    } else {
+	// var checkJson = checkHtmlFile(program.file, program.checks);
+	// var outJson = JSON.stringify(checkJson, null, 4);
+	// console.log(outJson);
+ //    }
+    checkUrl('http://s.taobao.com/search',
+        program.checks);
 } else {
     exports.checkHtmlFile = checkHtmlFile;
 }
